@@ -1,8 +1,13 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/syrlramadhan/cashier-app/dto"
@@ -317,5 +322,85 @@ func (c *ProductController) GetProductsByCategory(ctx *gin.Context) {
 		Success: true,
 		Message: "Products retrieved successfully",
 		Data:    products,
+	})
+}
+
+// UploadProductImage godoc
+// @Summary Upload product image
+// @Description Upload an image for a product
+// @Tags products
+// @Accept multipart/form-data
+// @Produce json
+// @Security BearerAuth
+// @Param image formData file true "Product image"
+// @Success 200 {object} dto.APIResponse{data=object{url string}}
+// @Failure 400 {object} dto.APIResponse
+// @Router /products/upload [post]
+func (c *ProductController) UploadProductImage(ctx *gin.Context) {
+	file, err := ctx.FormFile("image")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.APIResponse{
+			Success: false,
+			Message: "No image file provided",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	// Validate file type
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	allowedExts := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true}
+	if !allowedExts[ext] {
+		ctx.JSON(http.StatusBadRequest, dto.APIResponse{
+			Success: false,
+			Message: "Invalid file type. Allowed: jpg, jpeg, png, gif, webp",
+		})
+		return
+	}
+
+	// Validate file size (max 5MB)
+	if file.Size > 5*1024*1024 {
+		ctx.JSON(http.StatusBadRequest, dto.APIResponse{
+			Success: false,
+			Message: "File size exceeds 5MB limit",
+		})
+		return
+	}
+
+	// Create uploads directory if not exists
+	uploadDir := "./uploads/products"
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.APIResponse{
+			Success: false,
+			Message: "Failed to create upload directory",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	// Generate unique filename
+	filename := fmt.Sprintf("%d_%s%s", time.Now().UnixNano(), strings.ReplaceAll(file.Filename[:len(file.Filename)-len(ext)], " ", "_"), ext)
+	filePath := filepath.Join(uploadDir, filename)
+
+	// Save the file
+	if err := ctx.SaveUploadedFile(file, filePath); err != nil {
+		ctx.JSON(http.StatusInternalServerError, dto.APIResponse{
+			Success: false,
+			Message: "Failed to save file",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	// Return the URL
+	imageURL := fmt.Sprintf("/uploads/products/%s", filename)
+
+	ctx.JSON(http.StatusOK, dto.APIResponse{
+		Success: true,
+		Message: "Image uploaded successfully",
+		Data: gin.H{
+			"url":      imageURL,
+			"filename": filename,
+		},
 	})
 }

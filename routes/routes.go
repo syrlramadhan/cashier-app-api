@@ -39,6 +39,9 @@ func (r *Routes) SetupRouter() *gin.Engine {
 	// Global middleware
 	router.Use(middleware.CORSMiddleware())
 
+	// Serve static files for uploads
+	router.Static("/uploads", "./uploads")
+
 	// Health check endpoint
 	router.GET("/health", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{
@@ -88,6 +91,7 @@ func (r *Routes) SetupRouter() *gin.Engine {
 				products.GET("/:id", r.productController.GetProductByID)
 				products.GET("/category/:category_id", r.productController.GetProductsByCategory)
 				products.POST("", middleware.ManagerOrAdmin(), r.productController.CreateProduct)
+				products.POST("/upload", middleware.ManagerOrAdmin(), r.productController.UploadProductImage)
 				products.PUT("/:id", middleware.ManagerOrAdmin(), r.productController.UpdateProduct)
 				products.PATCH("/:id/stock", middleware.ManagerOrAdmin(), r.productController.UpdateStock)
 				products.DELETE("/:id", middleware.AdminOnly(), r.productController.DeleteProduct)
