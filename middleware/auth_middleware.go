@@ -54,10 +54,62 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			// Extract user info from claims
-			userID := uint(claims["user_id"].(float64))
-			email := claims["email"].(string)
-			role := claims["role"].(string)
+			// Extract user info from claims with nil checks
+			userIDClaim, exists := claims["user_id"]
+			if !exists || userIDClaim == nil {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.APIResponse{
+					Success: false,
+					Message: "Invalid token: user_id not found",
+				})
+				return
+			}
+
+			userIDFloat, ok := userIDClaim.(float64)
+			if !ok {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.APIResponse{
+					Success: false,
+					Message: "Invalid token: invalid user_id format",
+				})
+				return
+			}
+
+			emailClaim, exists := claims["email"]
+			if !exists || emailClaim == nil {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.APIResponse{
+					Success: false,
+					Message: "Invalid token: email not found",
+				})
+				return
+			}
+
+			email, ok := emailClaim.(string)
+			if !ok {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.APIResponse{
+					Success: false,
+					Message: "Invalid token: invalid email format",
+				})
+				return
+			}
+
+			roleClaim, exists := claims["role"]
+			if !exists || roleClaim == nil {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.APIResponse{
+					Success: false,
+					Message: "Invalid token: role not found",
+				})
+				return
+			}
+
+			role, ok := roleClaim.(string)
+			if !ok {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.APIResponse{
+					Success: false,
+					Message: "Invalid token: invalid role format",
+				})
+				return
+			}
+
+			userID := uint(userIDFloat)
 
 			// Set user info in context
 			ctx.Set("userID", userID)

@@ -57,4 +57,68 @@ func seedDefaultData() {
 		DB.Create(&categories)
 		log.Println("Default categories seeded")
 	}
+
+	// Seed default products (menu default)
+	var productCount int64
+	DB.Model(&models.Product{}).Count(&productCount)
+	if productCount == 0 {
+		// Get Minuman category ID
+		var minumanCategory models.Category
+		DB.Where("name = ?", "Minuman").First(&minumanCategory)
+
+		defaultProducts := []models.Product{
+			{
+				Name:       "Avo Coffee",
+				Price:      25000,
+				Stock:      100,
+				CategoryID: minumanCategory.ID,
+				Image:      "/uploads/products/avocoffe.png",
+			},
+			{
+				Name:       "Cappucino",
+				Price:      22000,
+				Stock:      100,
+				CategoryID: minumanCategory.ID,
+				Image:      "/uploads/products/cappucino.png",
+			},
+			{
+				Name:       "Chococa",
+				Price:      20000,
+				Stock:      100,
+				CategoryID: minumanCategory.ID,
+				Image:      "/uploads/products/chococa.png",
+			},
+			{
+				Name:       "Green Tea",
+				Price:      18000,
+				Stock:      100,
+				CategoryID: minumanCategory.ID,
+				Image:      "/uploads/products/greentea.png",
+			},
+			{
+				Name:       "Macachino",
+				Price:      24000,
+				Stock:      100,
+				CategoryID: minumanCategory.ID,
+				Image:      "/uploads/products/macachino.png",
+			},
+			{
+				Name:       "Machiato",
+				Price:      26000,
+				Stock:      100,
+				CategoryID: minumanCategory.ID,
+				Image:      "/uploads/products/machiato.png",
+			},
+			{
+				Name:       "Vallate Coffee Milk",
+				Price:      23000,
+				Stock:      100,
+				CategoryID: minumanCategory.ID,
+				Image:      "/uploads/products/vallate_coffemilk.png",
+			},
+		}
+
+		DB.Create(&defaultProducts)
+		log.Println("Default products seeded")
+	}
 }
