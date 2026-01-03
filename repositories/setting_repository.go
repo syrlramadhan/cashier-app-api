@@ -30,7 +30,7 @@ func (r *settingRepository) FindAll() ([]models.Setting, error) {
 
 func (r *settingRepository) FindByKey(key string) (*models.Setting, error) {
 	var setting models.Setting
-	err := r.db.Where("key = ?", key).First(&setting).Error
+	err := r.db.Where("`key` = ?", key).First(&setting).Error
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (r *settingRepository) Update(setting *models.Setting) error {
 }
 
 func (r *settingRepository) UpdateByKey(key string, value string) error {
-	return r.db.Model(&models.Setting{}).Where("key = ?", key).Update("value", value).Error
+	return r.db.Model(&models.Setting{}).Where("`key` = ?", key).Update("value", value).Error
 }
 
 func (r *settingRepository) Delete(id uint) error {

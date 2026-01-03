@@ -121,4 +121,35 @@ func seedDefaultData() {
 		DB.Create(&defaultProducts)
 		log.Println("Default products seeded")
 	}
+
+	// Seed default settings
+	var settingCount int64
+	DB.Model(&models.Setting{}).Count(&settingCount)
+	if settingCount == 0 {
+		defaultSettings := []models.Setting{
+			// Store settings
+			{Key: "store_name", Value: "Kasir POS"},
+			{Key: "store_address", Value: "Jl. Contoh No. 123, Jakarta"},
+			{Key: "store_phone", Value: "021-12345678"},
+			{Key: "store_logo", Value: ""},
+			// Payment settings
+			{Key: "tax_rate", Value: "11"},
+			{Key: "currency", Value: "IDR"},
+			{Key: "payment_cash_enabled", Value: "true"},
+			{Key: "payment_card_enabled", Value: "true"},
+			{Key: "payment_qris_enabled", Value: "true"},
+			// Printer settings
+			{Key: "printer_type", Value: "thermal"},
+			{Key: "receipt_footer", Value: "Terima kasih atas kunjungan Anda!"},
+			{Key: "auto_print", Value: "true"},
+			{Key: "print_logo", Value: "true"},
+			{Key: "print_duplicate", Value: "false"},
+			// General settings
+			{Key: "enable_sound", Value: "true"},
+			{Key: "enable_notifications", Value: "true"},
+			{Key: "auto_logout", Value: "30"},
+		}
+		DB.Create(&defaultSettings)
+		log.Println("Default settings seeded")
+	}
 }
