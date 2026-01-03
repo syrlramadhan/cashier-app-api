@@ -152,6 +152,7 @@ func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 		})
 	}
 }
+
 // AdminOnly middleware - only allows admin users
 func AdminOnly() gin.HandlerFunc {
 	return RoleMiddleware("admin")
